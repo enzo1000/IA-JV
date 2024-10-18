@@ -144,13 +144,13 @@ class Enemy
         List<int> casesVisites = new List<int>();
         List<int> frontiere = new List<int>();
 
-        //On met la case de départ a 0
+        //On met la case de départ a 0 (position du joueur)
         grille[origin].poids = 0;
 
-        //recuperer les voisins de a (appelés b) dans la liste frontiere
+        //recupere les voisins du point initial (b) dans frontiere
         foreach (int vois in getVoisin(origin, grille))
         {
-            //Si le voisin n'est pas un point de notre graphe
+            //Pas la peine de verifier s'il fait parti de notre graphe
             if (!P.Contains(vois))
             {
                 frontiere.Add(vois);
@@ -159,24 +159,31 @@ class Enemy
 
         float minDist = Mathf.Infinity;
         int index = 0;
+
         //Sur tout les membres de notre frontiere
         foreach (int vois in frontiere)
         {
-            //On prend le chemin le plus court de notre frontiere
-            if (grille[vois].distance() < minDist) {
+            //On prend le chemin le plus court dans notre frontiere
+            if (grille[vois].distance() < minDist)
+            {
                 minDist = grille[vois].distance();
                 index = vois;
             }
         }
 
-        //ajouter de nouveaux voisins
-        //recuperer le chemin le plus court ...
-        //  a chaque recuperation de chemin le plus cours, changer le poids de la tuile pour
-        //  notifier de l'avancé du chemin
-        //Continuer tant que toute tuiles pas explorés ou point de dest pas atteint.
+        //Si P ne contient pas notre voisin alors
 
-        //getPlusCoursChemin();
+        //if (!P.Contains(vois))
+        //{ }
 
-        List<int> voisin = getVoisin(origin, grille);
+            //ajouter de nouveaux voisins
+            //recuperer le chemin le plus court ...
+            //  a chaque recuperation de chemin le plus cours, changer le poids de la tuile pour
+            //  notifier de l'avancé du chemin
+            //Continuer tant que toute tuiles pas explorés ou point de dest pas atteint.
+
+            //getPlusCoursChemin();
+
+            List<int> voisin = getVoisin(origin, grille);
     }
 }
