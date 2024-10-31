@@ -1,13 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
-using UnityEditor.UI;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class MapCreation : MonoBehaviour
 {
-
     public int dimensionGrid = 1;
     public Material material;
     public int size3D = 10;
@@ -20,7 +17,7 @@ public class MapCreation : MonoBehaviour
     //Fonction servant à créer une tile du plateau de jeu
     private Tile generateSingleTile(int x, int y)
     {
-        Tile tile = new Tile(x, y, size3D);
+        Tile tile = new Tile(x, y, dimensionGrid, size3D);
         tile.tileGameObject.transform.parent = transform;
 
         Mesh mesh = new Mesh();
@@ -43,17 +40,105 @@ public class MapCreation : MonoBehaviour
     }
 
     //Fonction servant à créer un cube sur le plateau de jeu a une position pointe par la souris
-    private GameObject generateSingleWall(int hitPosition)
+    private GameObject generateSingleWall(int hitPosition, string tag = null)
     {
         Tile tile = grille[hitPosition];
 
         //Verification de si un mur est deja present ou non sur la case
-        if (tile.wall == null)
+        if (tile.onTop == null)
         {
             BoxCollider tileCollider = grille[hitPosition].tileGameObject.GetComponent<BoxCollider>();
 
             Vector3 tileCenter = tileCollider.center;
             Vector3 tileSize = tileCollider.size;
+
+            Vector3 cubeScale = new Vector3(tileSize.x, tileSize.y * 8, tileSize.z);
+            Vector3 cubePosition = new Vector3(tileCenter.x, tileCenter.y + (cubeScale.y / 2), tileCenter.z);
+
+            GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cube.transform.localScale = cubeScale;
+            cube.transform.position = cubePosition;
+            cube.GetComponent<MeshRenderer>().material.color = Color.blue;
+            
+            if (tag == null)    //A mieux rendre
+            {
+                cube.name = "Wall x pos : " + cubePosition.x + " z pos : " + cubePosition.z;
+                cube.transform.tag = "Wall"; 
+                cube.transform.parent = GameObject.Find("Walls").transform; //Organise tout les cubes dans un meme parent hierarchique
+            }
+            else
+            {
+                cube.name = "Enemy";
+
+                cube.transform.tag = tag;
+            }
+
+            tile.onTop = cube;  //Etape importante de lien entre le gameObject au dessus d'une Tile et la Tile de notre grille
+
+            return cube;    //Utile pour la creation de l'ennemi mais a retravailler
+            //TODO : simplifier spawnSeed et generateSingleWall en creant une fonction
+            // qui s'occupera de la creation d'un objet specifique dans la scene (cube) mais
+            // avec des parametres pour specifier la taille et autre.
+            // Avantage -> Moins de repetition de code, lisibilite et plus facile a faire evoluer
+            // Importance -> Faible, le code actuel fonctionne et reste tres lisible
+        }
+        return null;
+    }
+
+    //Fonction permettant la creation de point ou l'ennemi devra aller
+    public void spawnSeed()
+    {
+        int x = Random.Range(0, dimensionGrid);
+        int y = Random.Range(0, dimensionGrid);
+
+        Tile tile = grille[x + y * dimensionGrid];
+
+        if (tile.onTop == null)
+        {
+            //Faire apparaitre la graine
+            BoxCollider tileCollider = tile.tileGameObject.GetComponent<BoxCollider>();
+
+            Vector3 tileCenter = tileCollider.center;
+            Vector3 tileSize = tileCollider.size * 0.3f;
+
+            Vector3 seedScale = new Vector3(tileSize.x, tileSize.y * 10, tileSize.z);
+            Vector3 seedPosition = new Vector3(tileCenter.x, tileCenter.y + (seedScale.y / 2), tileCenter.z);
+
+            GameObject seed = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+            seed.transform.localScale = seedScale;
+            seed.transform.position = seedPosition;
+            seed.name = "Seed at x : " + seedPosition.x + " z : " + seedPosition.z;
+            seed.transform.tag = "Seed";
+            seed.GetComponent<MeshRenderer>().material.color = Color.green;
+
+            tile.onTop = seed;
+        }
+        else
+        {
+            spawnSeed();
+        }
+    }
+
+    //Algorithme utilise pour affiche le chemin des differents algorithmes de recherche de chemin
+    public void createPathCube(List<int> path)
+    {
+        //Copy de path afin de realiser des operations sur la liste
+        List<int> visuel = new List<int>();
+        visuel.AddRange(path);
+        visuel.RemoveAt(visuel.Count - 1);
+
+        //Parcours de path avec un indice en moins
+        foreach (int i in visuel)
+        {
+
+            Tile tile = grille[i];
+
+            //Faire apparaitre la graine
+            BoxCollider tileCollider = tile.tileGameObject.GetComponent<BoxCollider>();
+
+            Vector3 tileCenter = tileCollider.center;
+            Vector3 tileSize = tileCollider.size * 0.3f;
 
             Vector3 cubeScale = new Vector3(tileSize.x, tileSize.y * 10, tileSize.z);
             Vector3 cubePosition = new Vector3(tileCenter.x, tileCenter.y + (cubeScale.y / 2), tileCenter.z);
@@ -62,13 +147,11 @@ public class MapCreation : MonoBehaviour
 
             cube.transform.localScale = cubeScale;
             cube.transform.position = cubePosition;
+            cube.name = "Path at x : " + cubePosition.x + " z : " + cubePosition.z;
+            cube.GetComponent<MeshRenderer>().material.color = Color.red;
 
-            tile.wall = cube;
-
-            return cube;
+            tile.onTop = cube;
         }
-
-        return null;
     }
 
     //Viens generer tout le plateau de jeu
@@ -91,10 +174,10 @@ public class MapCreation : MonoBehaviour
         grille = new Tile[dimensionGrid * dimensionGrid];
         generateAllTiles();
         spawnEnnemy(0);
-
-        StartCoroutine(enemy.processEnemyMovement(grille, dimensionGrid));
+        spawnSeed();
 
         //Debug Purpose
+        //StartCoroutine(enemy.processEnemyMovement(grille, dimensionGrid));
         //StartCoroutine(VerifGridProperty());
     }
 
@@ -104,25 +187,18 @@ public class MapCreation : MonoBehaviour
         Ray ray = cam.ScreenPointToRay(Input.mousePosition);
         //Debug.DrawRay(ray.origin, ray.direction * 100, Color.green);
         processTileOvering(ray);
+
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            StartCoroutine(enemy.processEnemyMovement(grille, dimensionGrid));
+        }
     }
 
     //Fait apparaitre l'ennemie au debut de la partie
     void spawnEnnemy(int pos)
     {
-        enemy.enemyGameObject = generateSingleWall(pos);
+        enemy.enemyGameObject = generateSingleWall(pos, "Enemy");
         enemy.enemyGameObject.GetComponent<MeshRenderer>().material.color = Color.red;
-    }
-
-    //To be implemented
-    void randomSpawnLife()
-    {
-
-    }
-
-    //To be implemented
-    void clearBoard()
-    {
-        
     }
 
     //Fonction qui va venir identifier si notre curseur pointe sur une tile du plateau ou non
@@ -152,11 +228,25 @@ public class MapCreation : MonoBehaviour
             }
 
             //Detecte le clique gauche de la souris
-            if(Input.GetMouseButton(0))
+            if (Input.GetMouseButton(0))
             {
+                //Creer un mur
                 generateSingleWall(hitPosition);
             }
-
+            //Detecte le clique droit de la souriss
+            else if (Input.GetMouseButton(1))
+            {
+                //Supprime un mur
+                Tile tile = grille[hitPosition];
+                if (tile.onTop != null)
+                {
+                    if (tile.onTop.transform.tag == "Wall")
+                    {
+                        Destroy(grille[hitPosition].onTop.gameObject);
+                        grille[hitPosition].onTop = null;
+                    }
+                }
+            }
         }
         //Si on pas sur le plateau
         else

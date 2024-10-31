@@ -46,6 +46,8 @@ Thumbs.db
 *.gradle/
 *.ipa
 *.class
+*.vs
+*.vsconfig
 
 # Ignore Unity Cloud Build files
 [Uu]ser[Pp]rojectSettings/

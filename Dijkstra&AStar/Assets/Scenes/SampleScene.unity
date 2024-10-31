@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 393792920}
   m_Layer: 0
   m_Name: Map
-  m_TagString: Untagged
+  m_TagString: GameController
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -276,8 +276,8 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60.000004
-  orthographic: 0
-  orthographic size: 5
+  orthographic: 1
+  orthographic size: 50
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -301,13 +301,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 678981845}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7024304, y: -0.0017102718, z: 0.0016877769, w: -0.71174836}
-  m_LocalPosition: {x: 37.657776, y: 100.44688, z: 39.644634}
+  m_LocalRotation: {x: -0.31259412, y: -0.34318313, z: 0.12228881, w: -0.8772432}
+  m_LocalPosition: {x: -23.138603, y: 75.711914, z: -29.070778}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 0.276, z: 0.001}
 --- !u!114 &678981850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -594,7 +594,7 @@ MonoBehaviour:
   m_Follow: {fileID: 0}
   m_Lens:
     FieldOfView: 60.000004
-    OrthographicSize: 5
+    OrthographicSize: 50
     NearClipPlane: 0.3
     FarClipPlane: 1000
     Dutch: 0
@@ -619,12 +619,43 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1840392306}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.7024304, y: -0.0017102718, z: 0.0016877769, w: -0.71174836}
-  m_LocalPosition: {x: 37.657776, y: 100.44688, z: 39.644634}
+  m_LocalRotation: {x: -0.31259412, y: -0.34318313, z: 0.12228881, w: -0.8772432}
+  m_LocalPosition: {x: -23.138603, y: 75.711914, z: -29.070778}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1646658837}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 30, y: 45, z: 0}
+--- !u!1 &2044383283
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2044383284}
+  m_Layer: 0
+  m_Name: Walls
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2044383284
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2044383283}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 13.994622, y: -27.562744, z: 72.16427}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
@@ -635,3 +666,4 @@ SceneRoots:
   - {fileID: 393792921}
   - {fileID: 678981849}
   - {fileID: 1840392308}
+  - {fileID: 2044383284}

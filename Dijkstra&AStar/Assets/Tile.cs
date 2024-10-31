@@ -1,21 +1,24 @@
-using System;
 using UnityEngine;
 
 class Tile
 {
-
-    public GameObject tileGameObject;
-    public GameObject wall = null;
+    public GameObject onTop = null;     //Accede a l'element sur la tile (Wall, Seed, Enemy ...)
+    public GameObject tileGameObject;   //Accede a la tile en elle meme
     public int tileSize;
 
-    //data dijkstra
+    //data pour dijkstra
     public int poids = 1;
     public Tile predescesseur = null;
+    public int index = 0;
 
-    public Tile(int x, int y, int size) 
+    //data pour A*
+    public float heuristique;
+
+    public Tile(int x, int y, int dimensionGrid, int size) 
     {
         tileSize = size;
         tileGameObject = new GameObject(string.Format("X:{0}, Y:{1}", x, y));
+        index = x + y * dimensionGrid;
 
         tileGameObject.AddComponent<MeshFilter>();
         tileGameObject.AddComponent<MeshRenderer>();
