@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   k_AssetVersion: 3
   m_RenderingLayerNames:
-  - Default
+  - Hover
   m_ValidRenderingLayers: 1
   lightLayerName0: 
   lightLayerName1: 

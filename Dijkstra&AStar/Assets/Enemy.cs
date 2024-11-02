@@ -1,5 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using Unity.VisualScripting.ReorderableList.Element_Adder_Menu;
+using UnityEditor.ShaderKeywordFilter;
+using UnityEditor.UI;
 using UnityEngine;
 
 class Enemy
@@ -17,14 +21,15 @@ class Enemy
         //On initialise notre pts d'arrive (position de notre seed)
         int toGo = getSeed(grille, dim);
 
-        List<int> path = dijkstraPathfinding(origine, toGo, grille);
-
-        //Affiche le chemin sous forme de cubes rouges (modifier la couleur en fonction de l'algo)
-        GameObject.FindGameObjectWithTag("GameController").GetComponent<MapCreation>().createPathCube(path);
+        //List<int> path = dijkstraPathfinding(origine, toGo, grille);
+        List<int> path = aStar(origine, toGo, grille);
 
         //Si vrai alors on se dirige vers la graine
         if (path.Count > 0)
         {
+            //Affiche le chemin sous forme de cubes rouges (modifier la couleur en fonction de l'algo)
+            GameObject.FindGameObjectWithTag("GameController").GetComponent<MapCreation>().createPathCube(path);
+
             foreach (int tile in path)
             {
                 yield return new WaitForSeconds(0.5f);
@@ -273,7 +278,7 @@ class Enemy
         return path;
     }
 
-    private void aStar(int origin, int toGo, Tile[] grille)
+    private List<int> aStar(int origin, int toGo, Tile[] grille)
     {
         //Avec priorite en cle et indice en valeur
         List<int> openList = new List<int>();
@@ -285,30 +290,74 @@ class Enemy
             t.poids = 0;
         }
 
+        //On ajoute a notre open list
         openList.Add(origin);
-        foreach (int u in openList)
-        {
-            if (u == toGo)
+        int indice = origin;
+
+        while (indice != toGo) {
+            //On prend le coup le plus bas de openList
+            float minAStarCost = Mathf.Infinity;
+            foreach (int v in openList)
             {
-                break;
-            }
-            else
-            {
-                foreach(int v in getVoisin(u, grille))
+                if (grille[v].aStarCost < minAStarCost)
                 {
-                    if (!closedList.Contains(v))    //Ajouter la verification de v dans openList avec cout plus bas
+                    minAStarCost = grille[v].aStarCost;
+                    indice = v;
+                }
+            }
+
+            openList.Remove(indice);
+            closedList.Add(indice);
+
+            foreach (int v in getVoisin(indice, grille))
+            {
+                if (!closedList.Contains(v))
+                {
+                    Vector3 tileToGo = grille[toGo].tileGameObject.GetComponent<BoxCollider>().center;
+
+                    bool boule = true;
+                    //Verification de presence du voisin avec un coup plus haut qu'avec
+                    // ce nouveau predescesseur
+                    if (openList.Contains(v))
                     {
-                        grille[v].poids = grille[u].poids + 1;
+                        float distActuelle = grille[v].distanceAStar(tileToGo);
+                        Tile tmp = grille[v].predescesseur;
+                        grille[v].predescesseur = grille[indice];
+                        float distFutur = grille[v].distanceAStar(tileToGo);
+                        if (distActuelle < distFutur)
+                        {
+                            grille[v].predescesseur = tmp;
+                            boule = false;
+                        }
+                    }
+
+                    if (boule) {
+                        //On donne le predescesseur
+                        grille[v].predescesseur = grille[indice];
+
                         //heuristique (specificite de A*)
-                        grille[v].heuristique = grille[v].poids 
-                            + Vector3.Distance(
-                                grille[v].tileGameObject.GetComponent<BoxCollider>().center, 
-                                grille[toGo].tileGameObject.GetComponent<BoxCollider>().center);
-                        openList.Add(v);
+                        grille[v].aStarCost = grille[v].distanceAStar(tileToGo);
+
+                        if (!openList.Contains(v))
+                        {
+                            openList.Add(v);
+                        }
                     }
                 }
-                closedList.Add(u);
             }
         }
+
+        //Renvoyer les predescesseur de dest
+        int pathIndex = toGo;
+        List<int> path = new List<int>();
+
+        //Recreer le chemin
+        while (grille[pathIndex].predescesseur != null)
+        {
+            path.Insert(0, pathIndex);
+            pathIndex = grille[pathIndex].predescesseur.index;
+        }
+
+        return path;
     }
 }

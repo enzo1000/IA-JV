@@ -12,7 +12,7 @@ class Tile
     public int index = 0;
 
     //data pour A*
-    public float heuristique;
+    public float aStarCost;
 
     public Tile(int x, int y, int dimensionGrid, int size) 
     {
@@ -40,5 +40,13 @@ class Tile
     {
         if (predescesseur == null) { return 0; }
         return poids + predescesseur.distance();
+    }
+
+    public float distanceAStar(Vector3 toGo)
+    {
+        Vector3 from = tileGameObject.GetComponent<BoxCollider>().center;
+
+        if (predescesseur == null) { return Vector3.Distance(from, toGo); }
+        return poids + predescesseur.distanceAStar(toGo);
     }
 }
